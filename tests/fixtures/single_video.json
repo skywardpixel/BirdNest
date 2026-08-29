@@ -1,0 +1,21 @@
+{
+  "id": "1700000000000000001",
+  "uploader_id": "@jack",
+  "description": "a tweet with a video",
+  "timestamp": 1735689600,
+  "duration": 31.5,
+  "webpage_url": "https://x.com/jack/status/1700000000000000001",
+  "formats": [
+    {"url": "https://video.twimg.com/ext_tw_video/1/pu/vid/480x270/a.mp4",
+     "protocol": "https", "width": 480, "height": 270, "tbr": 400,
+     "vcodec": "avc1", "acodec": "mp4a"},
+    {"url": "https://video.twimg.com/ext_tw_video/1/pu/vid/1280x720/b.mp4",
+     "protocol": "https", "width": 1280, "height": 720, "tbr": 2200,
+     "vcodec": "avc1", "acodec": "mp4a"},
+    {"url": "https://video.twimg.com/ext_tw_video/1/pu/pl/c.m3u8",
+     "protocol": "m3u8_native", "width": 1920, "height": 1080, "tbr": 4000,
+     "vcodec": "avc1", "acodec": "mp4a"},
+    {"url": "https://video.twimg.com/ext_tw_video/1/pu/aud/d.m4a",
+     "protocol": "https", "vcodec": "none", "acodec": "mp4a", "tbr": 128}
+  ]
+}

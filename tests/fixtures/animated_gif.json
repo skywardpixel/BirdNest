@@ -1,0 +1,13 @@
+{
+  "id": "1700000000000000002",
+  "uploader_id": "@someone",
+  "description": "reaction gif",
+  "timestamp": 1735689600,
+  "duration": 3.2,
+  "webpage_url": "https://x.com/someone/status/1700000000000000002",
+  "formats": [
+    {"url": "https://video.twimg.com/tweet_video/AbCdEf.mp4",
+     "protocol": "https", "width": 498, "height": 280, "tbr": 900,
+     "vcodec": "avc1", "acodec": "none"}
+  ]
+}

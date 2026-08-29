@@ -1,0 +1,14 @@
+# Extension signing key — determines the extension ID. Never commit.
+extension/key.pem
+*.pem
+
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+
+# Throwaway clips used for manual clipboard testing
+testdata/

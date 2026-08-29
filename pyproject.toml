@@ -1,0 +1,27 @@
+[project]
+name = "birdnest"
+version = "0.1.0"
+description = "Save videos and GIFs from Twitter/X"
+requires-python = ">=3.11"
+dependencies = [
+    "yt-dlp>=2025.1.1",
+    "platformdirs>=4.0",
+    "pyobjc-framework-Cocoa>=10.0; sys_platform == 'darwin'",
+]
+
+[project.scripts]
+birdnest = "birdnest.cli:main"
+birdnest-host = "birdnest.host:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/birdnest"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

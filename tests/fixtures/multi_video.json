@@ -1,0 +1,20 @@
+{
+  "_type": "playlist",
+  "id": "1700000000000000003",
+  "uploader_id": "@multi",
+  "description": "two clips",
+  "timestamp": 1735689600,
+  "entries": [
+    {"id": "a", "duration": 5.0, "uploader_id": "@multi",
+     "description": "two clips", "timestamp": 1735689600,
+     "webpage_url": "https://x.com/multi/status/1700000000000000003",
+     "formats": [{"url": "https://video.twimg.com/ext_tw_video/3/vid/640x360/a.mp4",
+                  "protocol": "https", "width": 640, "height": 360, "tbr": 800,
+                  "vcodec": "avc1", "acodec": "mp4a"}]},
+    {"id": "b", "duration": 9.0, "uploader_id": "@multi",
+     "webpage_url": "https://x.com/multi/status/1700000000000000003",
+     "formats": [{"url": "https://video.twimg.com/tweet_video/Zz.mp4",
+                  "protocol": "https", "width": 320, "height": 180, "tbr": 300,
+                  "vcodec": "avc1", "acodec": "none"}]}
+  ]
+}
