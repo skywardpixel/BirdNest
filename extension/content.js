@@ -59,17 +59,7 @@ function resolve(node) {
   let index = players.findIndex((p) => p === el || p.contains(el));
   if (index < 0) index = 0;
 
-  return { tweetId, author, index, isGif: looksLikeGif(scope) };
-}
-
-// X labels animated GIFs with a small "GIF" pill inside the player. There is no
-// stabler client-side signal; the host re-checks authoritatively from the media
-// payload, so a wrong guess here only affects which menu items look enabled.
-function looksLikeGif(scope) {
-  for (const el of scope.querySelectorAll("span, div")) {
-    if (el.childElementCount === 0 && el.textContent.trim() === "GIF") return true;
-  }
-  return false;
+  return { tweetId, author, index };
 }
 
 chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
@@ -93,76 +83,6 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
 // ---------------------------------------------------------------------------
 
 const MARK = "data-birdnest";
-const MENU_CLASS = "birdnest-menu";
-
-const MENU_ITEMS = [
-  { action: "copy", gif: false, glyph: "\u29C9", label: "Copy to clipboard" },
-  { action: "save", gif: false, glyph: "\u21E9", label: "Save to Downloads" },
-  { action: "copy", gif: true, glyph: "\u25CD", label: "Copy as animated GIF" },
-  { action: "save", gif: true, glyph: "\u25CE", label: "Save as animated GIF" },
-];
-
-function closeMenus() {
-  for (const m of document.querySelectorAll("." + MENU_CLASS)) m.remove();
-}
-
-document.addEventListener("click", closeMenus, true);
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeMenus();
-}, true);
-
-function buildMenu(player, btn, found) {
-  closeMenus();
-
-  const menu = document.createElement("div");
-  menu.className = MENU_CLASS;
-  Object.assign(menu.style, {
-    position: "absolute", top: "48px", right: "8px", zIndex: "10000",
-    minWidth: "196px", padding: "4px", borderRadius: "10px",
-    background: "rgba(21,32,43,0.97)", color: "#fff",
-    font: "13px/1.4 system-ui, -apple-system, sans-serif",
-    boxShadow: "0 6px 24px rgba(0,0,0,0.45)",
-    border: "1px solid rgba(255,255,255,0.14)",
-  });
-
-  for (const item of MENU_ITEMS) {
-    const disabled = item.gif && found.isGif === false;
-    const row = document.createElement("div");
-    row.textContent = item.glyph + "   " + item.label;
-    Object.assign(row.style, {
-      padding: "8px 10px", borderRadius: "7px",
-      cursor: disabled ? "default" : "pointer",
-      opacity: disabled ? "0.4" : "1", whiteSpace: "nowrap",
-    });
-    if (disabled) {
-      row.title = "This media is a video, not an animated GIF";
-    } else {
-      row.addEventListener("mouseenter", () => {
-        row.style.background = "rgba(255,255,255,0.12)";
-      });
-      row.addEventListener("mouseleave", () => { row.style.background = ""; });
-      row.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeMenus();
-        run(btn, found, item.action, item.gif);
-      }, true);
-    }
-    menu.appendChild(row);
-  }
-
-  // Clicks inside the menu must not reach X's player (it toggles playback).
-  menu.addEventListener("click", (e) => e.stopPropagation(), true);
-  player.appendChild(menu);
-}
-
-function run(btn, found, action, gif) {
-  btn.textContent = "\u2026";
-  chrome.runtime.sendMessage({ type: "grab", action, gif, found }, (res) => {
-    btn.textContent = res && res.ok ? "\u2713" : "!";
-    setTimeout(() => { btn.textContent = btn.dataset.idleGlyph; }, 2500);
-  });
-}
 
 function inject(player) {
   if (!player || player.nodeType !== 1 || player.getAttribute(MARK)) return;
@@ -172,16 +92,12 @@ function inject(player) {
     player.style.position = "relative";
   }
 
-  const isGif = looksLikeGif(player);
   const btn = document.createElement("button");
   btn.type = "button";
-  // The idle glyph reflects what the media actually is, so the control reads
-  // differently on a GIF than on a video before anything is clicked.
-  btn.dataset.idleGlyph = isGif ? "\u25CD" : "\u21E9";
-  btn.textContent = btn.dataset.idleGlyph;
-  btn.title = isGif ? "BirdNest — animated GIF" : "BirdNest — video";
+  btn.textContent = "⇩";
+  btn.title = "BirdNest — click to copy, shift-click to save";
   Object.assign(btn.style, {
-    position: "absolute", top: "8px", right: "8px", zIndex: "10001",
+    position: "absolute", top: "8px", right: "8px", zIndex: "9999",
     width: "34px", height: "34px", borderRadius: "17px",
     border: "none", background: "rgba(0,0,0,0.65)", color: "#fff",
     font: "16px/1 system-ui, sans-serif", cursor: "pointer", padding: "0",
@@ -189,14 +105,20 @@ function inject(player) {
   });
 
   // Capture phase + stopPropagation: X treats a click anywhere in the player
-  // as play/pause and would otherwise toggle playback underneath the menu.
+  // as play/pause and would otherwise toggle playback underneath us.
   btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (player.querySelector("." + MENU_CLASS)) { closeMenus(); return; }
     const found = resolve(player);
     if (!found || !found.tweetId) { btn.textContent = "?"; return; }
-    buildMenu(player, btn, found);
+    btn.textContent = "…";
+    chrome.runtime.sendMessage(
+      { type: "grab", action: e.shiftKey ? "save" : "copy", found },
+      (res) => {
+        btn.textContent = res && res.ok ? "✓" : "!";
+        setTimeout(() => { btn.textContent = "⇩"; }, 2500);
+      },
+    );
   }, true);
 
   player.appendChild(btn);

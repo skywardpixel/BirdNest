@@ -57,40 +57,6 @@ function callHost(payload) {
   });
 }
 
-
-// --- Dynamic toolbar icon -------------------------------------------------
-// Drawn at runtime with OffscreenCanvas: an MV3 service worker has no DOM, so
-// there is no Image/document to build an icon from. Colour carries the state
-// at a glance; the badge still carries the detail.
-
-const ICON_STATES = {
-  idle: { bg: "#1DA1F2", glyph: "\u21E9" },
-  busy: { bg: "#F5A623", glyph: "\u2026" },
-  ok:   { bg: "#17BF63", glyph: "\u2713" },
-  err:  { bg: "#E0245E", glyph: "!" },
-};
-
-function setIconState(state) {
-  const spec = ICON_STATES[state] || ICON_STATES.idle;
-  try {
-    const size = 128;
-    const canvas = new OffscreenCanvas(size, size);
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = spec.bg;
-    ctx.beginPath();
-    ctx.arc(size / 2, size / 2, size / 2 - 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 72px system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(spec.glyph, size / 2, size / 2 + 4);
-    chrome.action.setIcon({ imageData: ctx.getImageData(0, 0, size, size) });
-  } catch (e) {
-    // OffscreenCanvas unavailable: the badge alone still conveys state.
-  }
-}
-
 function badge(text, color) {
   chrome.action.setBadgeText({ text });
   if (color) chrome.action.setBadgeBackgroundColor({ color });
@@ -104,7 +70,6 @@ function notify(title, message) {
 
 async function runGrab(found, { action, gif }) {
   badge("…", "#1DA1F2");
-  setIconState("busy");
   const res = await callHost({
     action, gif,
     tweet_id: found.tweetId,
@@ -114,15 +79,13 @@ async function runGrab(found, { action, gif }) {
 
   if (res && res.ok) {
     badge("✓", "#0a0");
-    setIconState("ok");
     notify("BirdNest",
       res.action === "copy" ? "Copied — ⌘V to paste" : "Saved " + res.path);
   } else {
     badge("!", "#b00");
-    setIconState("err");
     notify("BirdNest failed", (res && res.error) || "unknown error");
   }
-  setTimeout(() => { badge(""); setIconState("idle"); }, 4000);
+  setTimeout(() => badge(""), 4000);
   return res;
 }
 
@@ -157,9 +120,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   });
 });
 
-// No chrome.action.onClicked here: declaring default_popup in the manifest
-// makes Chrome open the popup instead of firing a click handler. The hotkeys
-// below remain the one-press path.
+// Triggers X cannot intercept: they never reach the page's event handlers.
+chrome.action.onClicked.addListener((tab) => {
+  if (tab && tab.id) grab(tab.id, { action: "copy", gif: false, source: "action" });
+});
 
 chrome.commands.onCommand.addListener((command, tab) => {
   if (!tab || !tab.id) return;
