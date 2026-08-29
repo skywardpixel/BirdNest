@@ -28,9 +28,18 @@
     }
   ],
   "action": {
-    "default_title": "BirdNest"
+    "default_title": "BirdNest",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
   },
   "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
     "128": "icon128.png"
   },
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAz0bdnew6eGe4dGqH4LOxyNVKuoOn+7Bp1u7VFUrSwR6bmZLEsBMVzaxF5esep1qIHDxsy34RWi7hb16iGb+mOHFIvFJd3InWMda9HVg4jdlyy+cW1ICQDYQcDuYJ4vIVyOb1qH53q01HSV4Cr0sf7n1fd7UAxjB/XdCSISL64MgLXfCeD2wuq1ASUwR8/HuyvNMoCd2NjHdD/oAGhKRmOhlq2JYXXzill1ZrtwTHsNyMupxOS9d/DPA8ErUpH2CKBsKo/Bmfa6/fHUFzr1kL+wrne1Bf67Os4Fe2QGUQEHrp3yEBZc3Oyc6BY2CirejNUK3f8Cz57cmNswXiz32EQQIDAQAB",

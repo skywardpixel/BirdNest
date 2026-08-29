@@ -152,6 +152,16 @@ paste to resolve.
 uv run pytest          # 36 tests, no network required
 ```
 
+The extension icons are generated, not hand-edited:
+
+```bash
+uv run --with pillow python tools/make_icon.py
+```
+
+They are drawn directly with Pillow rather than rasterised from SVG, because
+ImageMagick's built-in SVG renderer silently discarded the gradient and every
+stroke and emitted a solid black square.
+
 Resolution is tested against recorded payloads in `tests/fixtures/`, so the
 extraction mapping can be checked offline.
 
