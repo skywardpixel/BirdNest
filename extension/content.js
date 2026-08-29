@@ -84,6 +84,54 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
 
 const MARK = "data-birdnest";
 
+const BUTTONS = [
+  { glyph: "\u29C9", action: "copy", title: "BirdNest — copy to clipboard" },
+  { glyph: "\u21E9", action: "save", title: "BirdNest — save to Downloads" },
+];
+
+function run(btn, player, action) {
+  const found = resolve(player);
+  if (!found || !found.tweetId) {
+    btn.textContent = "?";
+    setTimeout(() => { btn.textContent = btn.dataset.idleGlyph; }, 2000);
+    return;
+  }
+  btn.textContent = "\u2026";
+  chrome.runtime.sendMessage({ type: "grab", action, gif: false, found }, (res) => {
+    btn.textContent = res && res.ok ? "\u2713" : "!";
+    setTimeout(() => { btn.textContent = btn.dataset.idleGlyph; }, 2000);
+  });
+}
+
+function makeButton(spec, player) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.textContent = spec.glyph;
+  btn.dataset.idleGlyph = spec.glyph;   // survives rapid re-clicks mid-state
+  btn.title = spec.title;
+  Object.assign(btn.style, {
+    width: "34px", height: "34px", borderRadius: "17px",
+    border: "none", background: "rgba(0,0,0,0.65)", color: "#fff",
+    font: "15px/1 system-ui, sans-serif", cursor: "pointer", padding: "0",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    transition: "background 120ms",
+  });
+  btn.addEventListener("mouseenter", () => {
+    btn.style.background = "rgba(29,161,242,0.95)";
+  });
+  btn.addEventListener("mouseleave", () => {
+    btn.style.background = "rgba(0,0,0,0.65)";
+  });
+  // Capture phase + stopPropagation: X treats a click anywhere in the player
+  // as play/pause and would otherwise toggle playback underneath the button.
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    run(btn, player, spec.action);
+  }, true);
+  return btn;
+}
+
 function inject(player) {
   if (!player || player.nodeType !== 1 || player.getAttribute(MARK)) return;
   player.setAttribute(MARK, "1");
@@ -92,36 +140,15 @@ function inject(player) {
     player.style.position = "relative";
   }
 
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.textContent = "⇩";
-  btn.title = "BirdNest — click to copy, shift-click to save";
-  Object.assign(btn.style, {
-    position: "absolute", top: "8px", right: "8px", zIndex: "9999",
-    width: "34px", height: "34px", borderRadius: "17px",
-    border: "none", background: "rgba(0,0,0,0.65)", color: "#fff",
-    font: "16px/1 system-ui, sans-serif", cursor: "pointer", padding: "0",
-    display: "flex", alignItems: "center", justifyContent: "center",
+  const bar = document.createElement("div");
+  Object.assign(bar.style, {
+    position: "absolute", top: "8px", right: "8px", zIndex: "10001",
+    display: "flex", gap: "6px",
   });
+  bar.addEventListener("click", (e) => e.stopPropagation(), true);
 
-  // Capture phase + stopPropagation: X treats a click anywhere in the player
-  // as play/pause and would otherwise toggle playback underneath us.
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const found = resolve(player);
-    if (!found || !found.tweetId) { btn.textContent = "?"; return; }
-    btn.textContent = "…";
-    chrome.runtime.sendMessage(
-      { type: "grab", action: e.shiftKey ? "save" : "copy", found },
-      (res) => {
-        btn.textContent = res && res.ok ? "✓" : "!";
-        setTimeout(() => { btn.textContent = "⇩"; }, 2500);
-      },
-    );
-  }, true);
-
-  player.appendChild(btn);
+  for (const spec of BUTTONS) bar.appendChild(makeButton(spec, player));
+  player.appendChild(bar);
 }
 
 function scan() {

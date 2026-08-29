@@ -63,8 +63,9 @@ is yours alone — `install-host` writes a host manifest matching it.
 
 | Action | Result |
 |---|---|
-| Click ⇩ on a player | Copy to clipboard |
-| Shift-click ⇩ | Save to `~/Downloads/BirdNest/` |
+| ⧉ on a player | Copy to clipboard |
+| ⇩ on a player | Save to `~/Downloads/BirdNest/` |
+| Click the toolbar icon | Copy the last hovered video |
 | ⌘⇧E | Copy the last hovered video |
 | ⌘⇧Y | Save the last hovered video |
 | Right-click **tweet text** | Context menu (see caveat below) |
