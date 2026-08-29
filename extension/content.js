@@ -145,7 +145,11 @@ function inject(player) {
     position: "absolute", top: "8px", right: "8px", zIndex: "10001",
     display: "flex", gap: "6px",
   });
-  bar.addEventListener("click", (e) => e.stopPropagation(), true);
+  // Bubble phase, NOT capture: a capture listener here fires before the
+  // buttons (capture runs root -> target) and stopPropagation would kill the
+  // event before it ever reached them. In bubble phase it runs after, and only
+  // catches clicks landing on the bar's own gap, keeping them off X's player.
+  bar.addEventListener("click", (e) => e.stopPropagation(), false);
 
   for (const spec of BUTTONS) bar.appendChild(makeButton(spec, player));
   player.appendChild(bar);
