@@ -28,7 +28,11 @@
     }
   ],
   "action": {
-    "default_title": "BirdNest"
+    "default_title": "BirdNest",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icon128.png"
+    }
   },
   "icons": {
     "128": "icon128.png"

@@ -63,11 +63,21 @@ is yours alone — `install-host` writes a host manifest matching it.
 
 | Action | Result |
 |---|---|
-| Click ⇩ on a player | Copy to clipboard |
-| Shift-click ⇩ | Save to `~/Downloads/BirdNest/` |
-| ⌘⇧E | Copy the last hovered video |
-| ⌘⇧Y | Save the last hovered video |
+| Click ⇩ / ◍ on a player | Opens a menu: copy, save, or either as an animated GIF |
+| Click the toolbar icon | The same menu, for the last hovered video |
+| ⌘⇧E | Copy the last hovered video — no menu, one press |
+| ⌘⇧Y | Save the last hovered video — no menu, one press |
 | Right-click **tweet text** | Context menu (see caveat below) |
+
+The player button's glyph reflects what the media is before you click it — ⇩
+for video, ◍ for one of X's animated GIFs — and the GIF entries in the menu
+are greyed out when the media is ordinary video. The toolbar icon is drawn at
+runtime and changes colour with state: blue idle, amber working, green done,
+red failed.
+
+The toolbar icon opens the menu rather than acting immediately, because Chrome
+fires a popup *or* a click handler, never both. The hotkeys stay the one-press
+path.
 
 X's player intercepts right-click over the video itself and shows its own menu,
 so Chrome's native context menu — and every `chrome.contextMenus` entry — is
