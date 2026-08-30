@@ -40,7 +40,7 @@ macOS, Python 3.11+, [uv](https://docs.astral.sh/uv/), ffmpeg
 ## Install
 
 ```bash
-git clone https://github.com/YOUR_USER/BirdNest.git
+git clone https://github.com/skywardpixel/BirdNest.git
 cd BirdNest
 uv sync
 uv run birdnest install-host
@@ -56,6 +56,10 @@ the extension once:
 
 The signing key is generated per machine and is gitignored, so your extension ID
 is yours alone — `install-host` writes a host manifest matching it.
+
+Note that `install-host` writes the derived public key into
+`extension/manifest.json`, which git therefore reports as modified after setup.
+That is expected; leave it uncommitted.
 
 ## Usage
 
@@ -164,6 +168,13 @@ stroke and emitted a solid black square.
 
 Resolution is tested against recorded payloads in `tests/fixtures/`, so the
 extraction mapping can be checked offline.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+Not affiliated with, endorsed by, or connected to X Corp. "Twitter" and "X" are
+trademarks of their respective owners.
 
 ## Scope
 
