@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 HOST_NAME = "com.birdnest.host"
+MANIFEST_TEMPLATE = "manifest.template.json"
 
 # Chromium-family browsers that read the same manifest format.
 BROWSER_DIRS = {
@@ -56,19 +57,31 @@ def ensure_keypair(ext_dir: Path) -> tuple[str, str]:
     return base64.b64encode(der).decode(), extension_id_from_der(der)
 
 
+def render_manifest(ext_dir: Path, pubkey_b64: str) -> Path:
+    """Render `manifest.json` from the tracked template plus this machine's key.
+
+    The rendered file is gitignored and the template carries no `key`: a shared
+    one would hand every clone an identity that is not its own, and it is the
+    reason this is generated rather than edited in place.
+    """
+    manifest = json.loads((ext_dir / MANIFEST_TEMPLATE).read_text())
+    manifest["key"] = pubkey_b64
+    out = ext_dir / "manifest.json"
+    out.write_text(json.dumps(manifest, indent=2) + "\n")
+    return out
+
+
 def install(ext_dir: Path, browser: str = "chrome") -> dict:
     if sys.platform != "darwin":
         raise RuntimeError("install-host currently supports macOS only")
 
-    manifest_path = ext_dir / "manifest.json"
-    if not manifest_path.exists():
-        raise FileNotFoundError(f"no extension manifest at {manifest_path}")
+    # Before ensure_keypair, so a wrong --extension-dir does not get a key.pem.
+    template = ext_dir / MANIFEST_TEMPLATE
+    if not template.exists():
+        raise FileNotFoundError(f"no extension manifest template at {template}")
 
     pubkey_b64, ext_id = ensure_keypair(ext_dir)
-
-    manifest = json.loads(manifest_path.read_text())
-    manifest["key"] = pubkey_b64
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    manifest_path = render_manifest(ext_dir, pubkey_b64)
 
     exe = Path(sys.executable).parent / "birdnest-host"
     if not exe.exists():
@@ -87,4 +100,5 @@ def install(ext_dir: Path, browser: str = "chrome") -> dict:
     }, indent=2) + "\n")
 
     return {"extension_id": ext_id, "host_manifest": str(target),
+            "extension_manifest": str(manifest_path),
             "executable": str(exe), "extension_dir": str(ext_dir)}

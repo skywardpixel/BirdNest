@@ -212,13 +212,19 @@ helper and the CLI are one entry point, so development happens through
 
 Install is two steps, once:
 
-1. Load the unpacked extension in Chrome.
-2. `birdnest install-host` — writes
+1. `birdnest install-host` — writes
    `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.birdnest.host.json`.
+2. Load the unpacked extension in Chrome.
 
 Pin `key` in the extension manifest so the extension ID stays stable; the host
 manifest hardcodes that ID in `allowed_origins` and otherwise breaks silently
 whenever an unpacked extension is reloaded from a different path.
+
+That key is per-machine, so `extension/manifest.json` is *generated*:
+`install-host` renders it from the tracked `manifest.template.json`, and only
+the template is committed. Committing the rendered file would both dirty every
+clone's working tree after setup and pin one machine's identity onto all of
+them — which is why install-host has to run before the first `Load unpacked`.
 
 *Keep the HTTP daemon as a documented fallback only* — it is the escape hatch if
 native messaging proves awkward, and it is what a future non-Chrome front-end
@@ -363,8 +369,9 @@ tests/fixtures/*.json          # recorded payloads: video, gif, multi-media, thr
 ```
 
 `uv` project; deps `yt-dlp`, `httpx`, `rich` (progress), `platformdirs`,
-`pyobjc-framework-Cocoa` (pasteboard). Plus `extension/` — MV3 manifest,
-service worker, content script — with no build step, loaded unpacked.
+`pyobjc-framework-Cocoa` (pasteboard). Plus `extension/` — MV3 manifest template,
+service worker, content script — with no build step beyond rendering the
+manifest, loaded unpacked.
 Tests run offline against fixtures; a small opt-in `--network` suite catches
 extractor breakage.
 

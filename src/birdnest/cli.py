@@ -207,6 +207,7 @@ def cmd_install_host(args, cfg: Config) -> int:
 
     info = install(args.extension_dir, args.browser)
     print(f"✓ host manifest  {info['host_manifest']}")
+    print(f"✓ ext manifest   {info['extension_manifest']}")
     print(f"  executable     {info['executable']}")
     print(f"  extension ID   {info['extension_id']}")
     print()

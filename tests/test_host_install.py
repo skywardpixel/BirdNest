@@ -5,7 +5,8 @@ from pathlib import Path
 
 import pytest
 from birdnest.host import handle
-from birdnest.install import extension_id_from_der
+from birdnest.install import (MANIFEST_TEMPLATE, extension_id_from_der,
+                              render_manifest)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -74,3 +75,30 @@ def test_ensure_on_path_prepends_and_is_idempotent(monkeypatch):
     postprocess.ensure_on_path()
     assert os.environ["PATH"] == first        # no unbounded growth
     assert "ffmpeg" in str(postprocess.find_ffmpeg())
+
+
+def test_committed_template_pins_no_key():
+    """The signing key is per-machine. A committed one silently hands every
+    clone an identity that is not its own — regression for 46661e0, where the
+    key survived two attempts at removing it."""
+    template = json.loads((ROOT / "extension" / MANIFEST_TEMPLATE).read_text())
+    assert "key" not in template
+
+
+def test_render_manifest_pins_the_key_without_touching_the_template(tmp_path):
+    template = tmp_path / MANIFEST_TEMPLATE
+    template.write_text('{"manifest_version": 3, "name": "BirdNest"}\n')
+
+    out = render_manifest(tmp_path, "PUBKEY")
+
+    assert json.loads(out.read_text()) == {
+        "manifest_version": 3, "name": "BirdNest", "key": "PUBKEY"}
+    assert "key" not in json.loads(template.read_text())
+
+
+def test_rendered_manifest_is_gitignored():
+    """It carries this machine's key, so `git add -A` must not pick it up."""
+    ignored = subprocess.run(
+        ["git", "check-ignore", "extension/manifest.json"],
+        cwd=ROOT, capture_output=True)
+    assert ignored.returncode == 0

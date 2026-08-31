@@ -2,6 +2,10 @@
 extension/key.pem
 *.pem
 
+# Rendered by `birdnest install-host` from manifest.template.json, with this
+# machine's public key pinned as `key`. Generated, and per-clone. Never commit.
+extension/manifest.json
+
 __pycache__/
 *.pyc
 .venv/

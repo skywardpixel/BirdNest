@@ -46,20 +46,22 @@ uv sync
 uv run birdnest install-host
 ```
 
-`install-host` generates a signing key, pins it in the extension manifest so the
-extension ID stays stable, and registers the native messaging host. Then load
-the extension once:
+`install-host` generates a signing key, renders `extension/manifest.json` from
+`extension/manifest.template.json` with that key pinned so the extension ID
+stays stable, and registers the native messaging host. Run it before loading the
+extension — the rendered manifest does not exist in a fresh clone. Then load the
+extension once:
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode**, click **Load unpacked**
 3. Select the `extension/` directory
 
 The signing key is generated per machine and is gitignored, so your extension ID
-is yours alone — `install-host` writes a host manifest matching it.
-
-Note that `install-host` writes the derived public key into
-`extension/manifest.json`, which git therefore reports as modified after setup.
-That is expected; leave it uncommitted.
+is yours alone — `install-host` writes a host manifest matching it. The rendered
+`extension/manifest.json` is gitignored for the same reason: it carries your
+public key, and a committed one would hand every clone an identity that is not
+its own. Edit `extension/manifest.template.json` when changing permissions,
+commands, or anything else about the extension, then re-run `install-host`.
 
 ## Usage
 
@@ -145,6 +147,9 @@ loaded. If it is present, X has changed its markup and the selectors in
 needs re-running if you move the project directory, since the host manifest
 records an absolute path.
 
+**Chrome says the extension is missing a manifest.** `extension/manifest.json`
+is generated; run `uv run birdnest install-host` before loading unpacked.
+
 **Nothing pastes.** A clipboard copy is a *file reference*, like Finder's ⌘C.
 Apps that accept file attachments take the video; a plain-text field gets the
 path. The file lives in `~/Library/Caches/BirdNest/` and must stay there for the
@@ -153,7 +158,7 @@ paste to resolve.
 ## Development
 
 ```bash
-uv run pytest          # 36 tests, no network required
+uv run pytest          # 39 tests, no network required
 ```
 
 The extension icons are generated, not hand-edited:
